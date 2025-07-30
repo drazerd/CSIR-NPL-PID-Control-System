@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "PID-Controlled Gas Pressure Stabilization System"
+version: 1.0.0
+date-released: 2025-07-30
+
+authors:
+  - family-names: Dua
+    given-names: Dhruv
+    affiliation: Indian Institute of Science Education and Research (IISER) Bhopal
+
+keywords:
+  - PID control
+  - gas flow
+  - Alicat
+  - Ruska
+  - Python
+  - pressure regulation
+
+license: CC-BY-NC-4.0
+repository-code: https://github.com/drazerd/CSIR-NPL-PID-Control-System
