@@ -44,7 +44,7 @@ def start_gui():
     root.mainloop()
 
 # --- Initial PID Values ---
-KP, KI, KD = 0.01, 0.005, 0.0005
+KP, KI, KD = 1, 0.09, 0.003
 
 # Start GUI in background
 gui_thread = threading.Thread(target=start_gui, daemon=True)
@@ -95,7 +95,7 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 ax.legend()
 
 # --- Control Setup ---
-TARGET_PRESSURE = 222000
+TARGET_PRESSURE = 550000
 MAX_FLOW_A = 500.0
 MIN_FLOW_A = 0.0
 MAX_FLOW_B = 10.0
@@ -127,11 +127,30 @@ try:
         except:
             continue
 
-        # --- PID Calculation ---
+        # --- PID Calculation with Anti-Windup ---
         error = TARGET_PRESSURE - pressure
-        integral += error * dt
+
+        # --- Predict integral growth ---
+        predicted_integral = integral + error * dt
         derivative = (error - previous_error) / dt if dt > 0 else 0
-        pid_output = KP * error + KI * integral + KD * derivative
+
+        # --- Predict PID output using predicted integral ---
+        predicted_output = KP * error + KI * predicted_integral + KD * derivative
+
+        # --- Apply anti-windup logic based on actuator limits ---
+        if predicted_output > MAX_FLOW_A:
+            pid_output = MAX_FLOW_A
+            # --- Only allow integral to decay slowly if output is saturated ---
+            integral *= 0.98
+        elif predicted_output < -MAX_FLOW_E:
+            pid_output = -MAX_FLOW_E
+            integral *= 0.98
+        else:
+            integral = predicted_integral
+            pid_output = predicted_output
+
+        previous_error = error
+        previous_time = now
 
         if pid_output >= 0:
             flow_set_A = min(pid_output, MAX_FLOW_A)
