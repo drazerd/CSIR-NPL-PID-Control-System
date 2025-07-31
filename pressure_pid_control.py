@@ -44,7 +44,7 @@ def start_gui():
     root.mainloop()
 
 # --- Initial PID Values ---
-KP, KI, KD = 1, 0.09, 0.003
+KP, KI, KD = 1, 0.09, 0.001
 
 # Start GUI in background
 gui_thread = threading.Thread(target=start_gui, daemon=True)
